@@ -37,7 +37,13 @@ exports.isUrlInList = function(url, cb) {
   });
 };
 
-exports.addUrlToList = function() {
+exports.addUrlToList = function(url, cb) {
+  exports.readListOfUrls(function(urls) {
+    urls.push(url);
+    fs.writeFile(exports.paths.list, urls.join('\n'), function(err) {
+      cb();
+    });
+  });
 };
 
 exports.isUrlArchived = function() {
