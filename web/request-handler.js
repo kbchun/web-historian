@@ -1,6 +1,7 @@
 var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var fs = require('fs');
+var httpHelpers = require('http-helpers');
 // require more modules/folders here!
 
 exports.handleRequest = function (req, res) {
@@ -19,41 +20,38 @@ exports.handleRequest = function (req, res) {
   // check if url starts with www. and ends with .com
   } else if (req.url.match(/^\/www\..*\.com$/)) {
     var slicedURL = req.url.slice(1);
-    // check if url is in list
-    archive.isUrlInList(slicedURL, function(listed) {
-      // if url is in list
-      if (listed) {
-        // check if url is in archive
-        archive.isUrlArchived(slicedURL, function(archived) {
-          //if url is in archive
-          if (archived) {
-            // serve webpage to client
-            console.log(archive.paths.archivedSites + req.url);
-            fs.readFile(archive.paths.archivedSites + req.url, 'utf8', function(err, data) {
-              res.end(data);
-            }); 
+    // check if url is in archive
+    archive.isUrlArchived(slicedURL, function(archived) {
+      // if url is in archive
+      if (archived) {
+        // serve webpage to client
+        fs.readFile(archive.paths.archivedSites + req.url, 'utf8', function(err, data) {
+          res.end(data);
+        }); 
 
-          //if url is not in archive
+      // if url is not in archive (post request)
+      } else {
+        // check if url is in list
+        archive.isUrlInList(slicedURL, function(listed) {
+          //if url is in list
+          if (listed) {
+            fs.readFile(archive.paths.siteAssets + '/loading.html', 'utf8', function(err, data) {
+              res.end(data);
+            });
+          //if url is not in list
           } else {
+            // let client know page is loading
+            // add url to list
+            archive.addUrlToList(slicedURL, function() {
+              console.log(slicedURL + ' added to list');
+            });
+
             // let client know page is loading
             fs.readFile(archive.paths.siteAssets + '/loading.html', 'utf8', function(err, data) {
               res.end(data);
             });
           }
         });
-
-      // if url is not in list (post request)
-      } else {
-        // add url to list
-        archive.addUrlToList(slicedURL, function() {
-          console.log(slicedURL + ' added to list');
-        });
-
-        // let client know page is loading
-        fs.readFile(archive.paths.siteAssets + '/loading.html', 'utf8', function(err, data) {
-          res.end(data);
-        });
-
       }
     });
   }
