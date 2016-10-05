@@ -44,6 +44,7 @@ exports.addUrlToList = function(url, cb) {
   exports.readListOfUrls(function(urls) {
     urls.push(url);
     fs.writeFile(exports.paths.list, urls.join('\n'), function(err) {
+      if (err) { throw err; }
       cb();
     });
   });
@@ -51,7 +52,7 @@ exports.addUrlToList = function(url, cb) {
 
 exports.isUrlArchived = function(url, cb) {
   fs.readdir(exports.paths.archivedSites, function(err, files) {
-    console.log(files);
+    if (err) { throw err; }
     cb(files.indexOf(url) !== -1);
   });
 };
