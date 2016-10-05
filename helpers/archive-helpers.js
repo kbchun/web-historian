@@ -27,11 +27,14 @@ exports.initialize = function(pathsObj) {
 
 exports.readListOfUrls = function(cb) {
   fs.readFile(exports.paths.list, function(err, data) {
-    return cb(data.toString().split('\n'));
+    cb(data.toString().split('\n'));
   });
 };
 
-exports.isUrlInList = function() {
+exports.isUrlInList = function(url, cb) {
+  exports.readListOfUrls(function(urls) {
+    cb(urls.indexOf(url) >= 0);
+  });
 };
 
 exports.addUrlToList = function() {
