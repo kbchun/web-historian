@@ -1,6 +1,8 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var http = require('http');
+var https = require('https');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -26,14 +28,15 @@ exports.initialize = function(pathsObj) {
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(cb) {
-  fs.readFile(exports.paths.list, function(err, data) {
-    cb(data.toString().split('\n'));
+  fs.readFile(exports.paths.list, 'utf8', function(err, data) {
+    if (err) { throw err; }
+    cb(data.split('\n'));
   });
 };
 
 exports.isUrlInList = function(url, cb) {
   exports.readListOfUrls(function(urls) {
-    cb(urls.indexOf(url) >= 0);
+    cb(urls.indexOf(url) !== -1);
   });
 };
 
@@ -46,8 +49,28 @@ exports.addUrlToList = function(url, cb) {
   });
 };
 
-exports.isUrlArchived = function() {
+exports.isUrlArchived = function(url, cb) {
+  fs.readdir(exports.paths.archivedSites, function(err, files) {
+    console.log(files);
+    cb(files.indexOf(url) !== -1);
+  });
 };
 
-exports.downloadUrls = function() {
+exports.downloadUrls = function(urls) {
+  // urls.forEach(function(url) {
+  //   http.get({host: url}, function(response) {
+  //     // console.log(response);
+  //     response.on('data', function(chunk) {
+  //       console.log(chunk.toString());
+  //       fs.writeFile(exports.paths.archivedSites + '/' + url, chunk.toString());
+  //     });
+  //   });
+  // });
+
+  urls.forEach(function(url) {
+    var file = fs.createWriteStream(exports.paths.archivedSites + '/' + url);
+    var request = https.get({host: url}, function(response) {
+      response.pipe(file);
+    });
+  });
 };

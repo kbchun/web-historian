@@ -5,14 +5,15 @@ var fs = require('fs');
 
 exports.handleRequest = function (req, res) {
   if (req.url.match(/^\/$|\/index\.html/)) {
-    fs.readFile(archive.paths.siteAssets + '/index.html', function(err, data) {
+    fs.readFile(archive.paths.siteAssets + '/index.html', 'utf8', function(err, data) {
       res.end(data);
     });    
   } else if (req.url === '/styles.css') {
-    fs.readFile(archive.paths.siteAssets + '/styles.css', function(err, data) {
+    fs.readFile(archive.paths.siteAssets + '/styles.css', 'utf8', function(err, data) {
       res.end(data);
     }); 
-  } 
+  }
+  archive.downloadUrls(['www.google.com', 'www.amazon.com']);
   // else if (!req.url.match(/ /)) {
 
   // } else {
