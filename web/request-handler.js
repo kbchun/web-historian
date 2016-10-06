@@ -62,21 +62,14 @@ exports.handleRequest = function (req, res) {
     //if url is not in list
     // add url to list
     // POST request
-    res.writeHead(201, httpHelpers.headers);
-    archive.addUrlToList(slicedURL, function() {
-      console.log(req.url + 'added to list');
-      console.log(slicedURL + ' added to list');
+    res.writeHead(302, httpHelpers.headers);
+    req.on('data', function(url) {
+      archive.addUrlToList(url.toString().slice(4), function() {
+        console.log(url.toString().slice(4) + ' added to list');
+        res.end();
+      });
     });
   }
 
   console.log('serving request type ', req.method, ' at localhost');
-
-
-  // if (req.url === '/www.google.com') {
-  //   fs.readFile(archive.paths.archivedSites + req.url, 'utf8', function(err, data) {
-  //     res.end(data);
-  //   }); 
-  // }
-  //archive.downloadUrls(['www.google.com', 'www.amazon.com']);
-  // else if (!req.url.match(/ /)) {
 };
