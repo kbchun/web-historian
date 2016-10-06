@@ -1,10 +1,10 @@
 var path = require('path');
 var _ = require('underscore');
 var http = require('http');
+var https = require('https');
 var Promise = require('bluebird');
-var https = Promise.promisifyAll(require('https'));
 var fs = Promise.promisifyAll(require('fs'));
-
+var request = require('request');
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
  * Consider using the `paths` object below to store frequently used file paths. This way,
@@ -63,8 +63,9 @@ exports.isUrlArchived = function(url) {
 exports.downloadUrls = function(urls) {
   urls.forEach(function(url) {
     var file = fs.createWriteStream(exports.paths.archivedSites + '/' + url);
-    https.getAsync({host: url}, function(response) {
-      response.pipe(file);
-    });
+    request('http://' + url).pipe(file);
+    // , function(err, res, body) {
+    //   body.pipe(file);
+    // });
   });
 };
