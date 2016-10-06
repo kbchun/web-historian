@@ -1,8 +1,9 @@
-var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
 var http = require('http');
-var https = require('https');
+var Promise = require('bluebird');
+var https = Promise.promisifyAll(require('https'));
+var fs = Promise.promisifyAll(require('fs'));
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -27,53 +28,42 @@ exports.initialize = function(pathsObj) {
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(cb) {
-  fs.readFile(exports.paths.list, 'utf8', function(err, data) {
-    if (err) { throw err; }
-    cb(data.trim().split('\n'));
-  });
+exports.readListOfUrls = function() {
+  return fs.readFileAsync(exports.paths.list, 'utf8')
+    .then(function(data) {
+      return data.trim().split('\n');
+    });
 };
 
-exports.isUrlInList = function(url, cb) {
-  exports.readListOfUrls(function(urls) {
-    cb(urls.indexOf(url) !== -1);
-  });
+exports.isUrlInList = function(url) {
+  return exports.readListOfUrls()
+    .then(function(urls) {
+      return urls.indexOf(url) !== -1;
+    });
 };
 
-exports.addUrlToList = function(url, cb) {
-  fs.appendFile(exports.paths.list, url + '\n', 'utf8', function(err) {
-    if (err) { throw err; }
-    cb();
-  });
+exports.addUrlToList = function(url) {
+  return fs.appendFileAsync(exports.paths.list, url + '\n', 'utf8');
 };
 
-exports.readArchiveOfUrls = function(cb) {
-  fs.readdir(exports.paths.archivedSites, function(err, files) { 
-    if (err) { throw err; }
-    cb(files);
-  });
+exports.readArchiveOfUrls = function() {
+  return fs.readdirAsync(exports.paths.archivedSites)
+    .then(function(files) { 
+      return files;
+    });
 };
 
-exports.isUrlArchived = function(url, cb) {
-  exports.readArchiveOfUrls(function(urls) {
-    cb(urls.indexOf(url) !== -1);
-  });
+exports.isUrlArchived = function(url) {
+  return exports.readArchiveOfUrls()
+    .then(function(urls) {
+      return urls.indexOf(url) !== -1;
+    });
 };
 
 exports.downloadUrls = function(urls) {
-  // urls.forEach(function(url) {
-  //   http.get({host: url}, function(response) {
-  //     // console.log(response);
-  //     response.on('data', function(chunk) {
-  //       console.log(chunk.toString());
-  //       fs.writeFile(exports.paths.archivedSites + '/' + url, chunk.toString());
-  //     });
-  //   });
-  // });
-
   urls.forEach(function(url) {
     var file = fs.createWriteStream(exports.paths.archivedSites + '/' + url);
-    var request = https.get({host: url}, function(response) {
+    https.getAsync({host: url}, function(response) {
       response.pipe(file);
     });
   });
