@@ -62,11 +62,19 @@ exports.handleRequest = function (req, res) {
     //if url is not in list
     // add url to list
     // POST request
-    res.writeHead(302, httpHelpers.headers);
     req.on('data', function(url) {
-      archive.addUrlToList(url.toString().slice(4), function() {
-        console.log(url.toString().slice(4) + ' added to list');
-        res.end();
+      slicedURL = url.toString().slice(4);
+      res.statusCode = 302;
+      res.setHeader('Location', 'http://127.0.0.1:8080/' + slicedURL);
+      archive.isUrlInList(slicedURL, function(listed) {
+        if (!listed) {
+          archive.addUrlToList(slicedURL, function() {
+            console.log(slicedURL + ' added to list');
+            res.end();
+          });
+        } else {
+          res.end();
+        }
       });
     });
   }

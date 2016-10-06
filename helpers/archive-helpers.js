@@ -30,7 +30,7 @@ exports.initialize = function(pathsObj) {
 exports.readListOfUrls = function(cb) {
   fs.readFile(exports.paths.list, 'utf8', function(err, data) {
     if (err) { throw err; }
-    cb(data.split('\n'));
+    cb(data.trim().split('\n'));
   });
 };
 
@@ -47,10 +47,16 @@ exports.addUrlToList = function(url, cb) {
   });
 };
 
-exports.isUrlArchived = function(url, cb) {
-  fs.readdir(exports.paths.archivedSites, function(err, files) {
+exports.readArchiveOfUrls = function(cb) {
+  fs.readdir(exports.paths.archivedSites, function(err, files) { 
     if (err) { throw err; }
-    cb(files.indexOf(url) !== -1);
+    cb(files);
+  });
+};
+
+exports.isUrlArchived = function(url, cb) {
+  exports.readArchiveOfUrls(function(urls) {
+    cb(urls.indexOf(url) !== -1);
   });
 };
 
