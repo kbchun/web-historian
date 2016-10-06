@@ -2,13 +2,11 @@
 // that are waiting.
 var archive = require('../helpers/archive-helpers');
 var _ = require('underscore');
+var Promise = require('bluebird');
 
 // archive.downloadUrls(['www.google.com']);
-archive.readListOfUrls(function(listUrls) {
-  archive.readArchiveOfUrls(function(archiveUrls) {
-     // console.log(_.difference(listUrls, archiveUrls));
-    // var x = _.difference(listUrls, archiveUrls);
-    console.log(_.difference(listUrls, archiveUrls));
+
+Promise.join(archive.readListOfUrls(), archive.readArchiveOfUrls(), 
+  function(listUrls, archiveUrls) {
     archive.downloadUrls(_.difference(listUrls, archiveUrls));
   });
-});
