@@ -48,14 +48,14 @@ exports.handleRequest = function (req, res) {
               // let client know page is loading
               // make special interface to tell user to use our textbox
               res.writeHead(404, httpHelpers.headers);
-              res.end();
+              res.end('please request through our textbox');
             }
           });
         }
       });
     } else {
       res.writeHead(404, httpHelpers.headers);
-      res.end();
+      res.end('invalid request');
     }
 
   } else if (req.method === 'POST') {
@@ -64,18 +64,24 @@ exports.handleRequest = function (req, res) {
     // POST request
     req.on('data', function(url) {
       slicedURL = url.toString().slice(4);
-      res.statusCode = 302;
-      res.setHeader('Location', 'http://127.0.0.1:8080/' + slicedURL);
-      archive.isUrlInList(slicedURL, function(listed) {
-        if (!listed) {
-          archive.addUrlToList(slicedURL, function() {
-            console.log(slicedURL + ' added to list');
+      console.log(slicedURL);
+      if (slicedURL.match(/^www\..*\.com$/)) {
+        res.statusCode = 302;
+        res.setHeader('Location', 'http://127.0.0.1:8080/' + slicedURL);
+        archive.isUrlInList(slicedURL, function(listed) {
+          if (!listed) {
+            archive.addUrlToList(slicedURL, function() {
+              console.log(slicedURL + ' added to list');
+              res.end();
+            });
+          } else {
             res.end();
-          });
-        } else {
-          res.end();
-        }
-      });
+          }
+        });
+      } else {
+        res.writeHead(404, httpHelpers.headers);
+        res.end('invalid request');
+      }
     });
   }
 
